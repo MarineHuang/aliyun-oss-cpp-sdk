@@ -272,3 +272,7 @@ cd build
 cmake -DCMAKE_CL_64=1 -G "MinGW Makefiles" ..
 mingw32-make.exe
 ```
+使用panman安装依赖库
+```
+pacman -S curl apr apr-util  mingw64/mingw-w64-x86_64-mxml
+```
