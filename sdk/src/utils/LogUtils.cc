@@ -44,7 +44,7 @@ static std::string LogPrefix(LogLevel logLevel, const char* tag)
     auto ms = tp.time_since_epoch().count() % 1000;
     auto t = std::chrono::system_clock::to_time_t(tp);
     struct tm tm;
-#ifdef WIN32
+#ifdef _WIN32
     ::localtime_s(&tm, &t);
 #else
     ::localtime_r(&t, &tm);
@@ -70,7 +70,7 @@ void AlibabaCloud::OSS::FormattedLog(LogLevel logLevel, const char* tag, const c
     int i = 0;
     va_list args;
     va_start(args, fmt);
-#ifdef WIN32
+#ifdef _WIN32
     i = vsnprintf_s(buffer, sizeof(buffer) - 1, _TRUNCATE, fmt, args);
 #else
     i = vsnprintf(buffer, sizeof(buffer) - 1, fmt, args);

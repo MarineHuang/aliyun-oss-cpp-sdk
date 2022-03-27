@@ -527,6 +527,13 @@ std::string AlibabaCloud::OSS::ToUtcTime(std::time_t &t)
     return date.str();
 }
 
+std::time_t mkgmtime64(struct tm* timeptr)
+{
+   std::time_t tt = mktime(timeptr);
+
+   return tt;
+}
+
 std::time_t AlibabaCloud::OSS::UtcToUnixTime(const std::string &t)
 {
     const char* date = t.c_str();
@@ -540,7 +547,7 @@ std::time_t AlibabaCloud::OSS::UtcToUnixTime(const std::string &t)
         tm.tm_year = tm.tm_year - 1900;
         tm.tm_mon = tm.tm_mon - 1;
 #ifdef _WIN32
-        tt = _mkgmtime64(&tm);
+        tt = mkgmtime64(&tm);
 #else
         tt = timegm(&tm);
 #endif // _WIN32

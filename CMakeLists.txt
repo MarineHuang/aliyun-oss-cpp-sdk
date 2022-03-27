@@ -33,7 +33,7 @@ option(BUILD_TESTS "Build unit and perfermence tests" OFF)
 option(ENABLE_COVERAGE "Flag to enable/disable building code with -fprofile-arcs and -ftest-coverage. Gcc only" OFF)
 option(ENABLE_RTTI "Flag to enable/disable building code with RTTI information" ON)
 
-
+set(HAVE__MKGMTIME64 1)
 #Platform
 if (CMAKE_CROSSCOMPILING)
 	if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
@@ -118,7 +118,7 @@ else()
 	list(APPEND SDK_COMPILER_FLAGS "-fno-rtti")
 	endif()
 	
-	list(APPEND SDK_COMPILER_FLAGS "-Wall" "-Werror" "-pedantic" "-Wextra")
+	list(APPEND SDK_COMPILER_FLAGS "-Wall" "-pedantic" "-Wextra")
 	
 	if (ENABLE_COVERAGE)
 	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")

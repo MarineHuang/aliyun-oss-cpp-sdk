@@ -205,13 +205,29 @@ bool AlibabaCloud::OSS::IsFileExist(const std::wstring& file)
 }
 #endif
 
+std::string ws2s(const std::wstring &ws)
+{
+    size_t i;
+    std::string curLocale = setlocale(LC_ALL, NULL);
+    setlocale(LC_ALL, "chs");
+    const wchar_t* _source = ws.c_str();
+    size_t _dsize = 2 * ws.size() + 1;
+    char* _dest = new char[_dsize];
+    memset(_dest, 0x0, _dsize);
+    wcstombs_s(&i, _dest, _dsize, _source, _dsize);
+    std::string result = _dest;
+    delete[] _dest;
+    setlocale(LC_ALL, curLocale.c_str());
+    return result;
+}
+
 std::shared_ptr<std::fstream> AlibabaCloud::OSS::GetFstreamByPath(
     const std::string& path, const std::wstring& pathw,
     std::ios_base::openmode mode)
 {
 #ifdef _WIN32
     if (!pathw.empty()) {
-        return std::make_shared<std::fstream>(pathw, mode);
+        return std::make_shared<std::fstream>(ws2s(pathw), mode);
     }
 #else
     ((void)(pathw));
