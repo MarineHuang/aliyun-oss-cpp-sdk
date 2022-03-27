@@ -179,3 +179,94 @@ int main(int argc, char** argv)
 
 ## 许可协议
 请参阅 LICENSE 文件（Apache 2.0 许可证）。
+
+## Windows下基于MINGW编译aliyun-oss-cpp-sdk
+修改代码：
+src/utils/FileSystemUtils.cc
+增加如下代码：
+
+std::string ws2s(const std::wstring &ws)
+{
+    size_t i;
+    std::string curLocale = setlocale(LC_ALL, NULL);
+    setlocale(LC_ALL, "chs");
+    const wchar_t* _source = ws.c_str();
+    size_t _dsize = 2 * ws.size() + 1;
+    char* _dest = new char[_dsize];
+    memset(_dest, 0x0, _dsize);
+    wcstombs_s(&i, _dest, _dsize, _source, _dsize);
+    std::string result = _dest;
+    delete[] _dest;
+    setlocale(LC_ALL, curLocale.c_str());
+    return result;
+}
+
+修改如下代码：
+
+std::shared_ptr<std::fstream> AlibabaCloud::OSS::GetFstreamByPath(
+    const std::string& path, const std::wstring& pathw,
+    std::ios_base::openmode mode)
+{
+#ifdef _WIN32
+    if (!pathw.empty()) {
+        return std::make_shared<std::fstream>(ws2s(pathw), mode);
+    }
+#else
+    ((void)(pathw));
+#endif
+    return std::make_shared<std::fstream>(path, mode);
+}
+
+修改文件src/utils/ResumableBaseWorker.cc
+
+#include <string>
+#include <algorithm>
+#ifdef _WIN32
+#include <codecvt>
+#include <locale>
+#endif
+#include <alibabacloud/oss/Const.h>
+#include "ResumableBaseWorker.h"
+#include "../utils/FileSystemUtils.h"
+#include "../utils/Utils.h"
+
+修改文件sdk/src/utils/Utils.cc
+std::time_t mkgmtime64(struct tm* timeptr)
+{
+   std::time_t tt = mktime(timeptr);
+
+   return tt;
+}
+
+std::time_t AlibabaCloud::OSS::UtcToUnixTime(const std::string &t)
+{
+    const char* date = t.c_str();
+    std::tm tm;
+    std::time_t tt = -1;
+    int ms;
+    auto result = sscanf(date, "%4d-%2d-%2dT%2d:%2d:%2d.%dZ",
+        &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour, &tm.tm_min, &tm.tm_sec, &ms);
+
+    if (result == 7) {
+        tm.tm_year = tm.tm_year - 1900;
+        tm.tm_mon = tm.tm_mon - 1;
+#ifdef _WIN32
+        tt = mkgmtime64(&tm);
+#else
+        tt = timegm(&tm);
+#endif // _WIN32
+    }
+    return tt < 0 ? -1 : tt;
+}
+		 
+修改文件CMakeLists.txt
+36行增加代码:
+set(HAVE__MKGMTIME64 1)
+
+编译：
+mkdir build
+cd build
+# mingw64位编译,如果mingw安装32位版本，则把-DCMAKE_CL_64=1去掉
+cmake -DCMAKE_CL_64=1 -G "MinGW Makefiles" ..
+mingw32-make.exe
+
