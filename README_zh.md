@@ -184,7 +184,7 @@ int main(int argc, char** argv)
 修改代码：
 src/utils/FileSystemUtils.cc
 增加如下代码：
-
+```
 std::string ws2s(const std::wstring &ws)
 {
     size_t i;
@@ -200,9 +200,9 @@ std::string ws2s(const std::wstring &ws)
     setlocale(LC_ALL, curLocale.c_str());
     return result;
 }
-
+```
 修改如下代码：
-
+```
 std::shared_ptr<std::fstream> AlibabaCloud::OSS::GetFstreamByPath(
     const std::string& path, const std::wstring& pathw,
     std::ios_base::openmode mode)
@@ -216,9 +216,9 @@ std::shared_ptr<std::fstream> AlibabaCloud::OSS::GetFstreamByPath(
 #endif
     return std::make_shared<std::fstream>(path, mode);
 }
-
+```
 修改文件src/utils/ResumableBaseWorker.cc
-
+```
 #include <string>
 #include <algorithm>
 #ifdef _WIN32
@@ -229,8 +229,9 @@ std::shared_ptr<std::fstream> AlibabaCloud::OSS::GetFstreamByPath(
 #include "ResumableBaseWorker.h"
 #include "../utils/FileSystemUtils.h"
 #include "../utils/Utils.h"
-
+```
 修改文件sdk/src/utils/Utils.cc
+```
 std::time_t mkgmtime64(struct tm* timeptr)
 {
    std::time_t tt = mktime(timeptr);
@@ -258,15 +259,16 @@ std::time_t AlibabaCloud::OSS::UtcToUnixTime(const std::string &t)
     }
     return tt < 0 ? -1 : tt;
 }
-		 
+```		 
 修改文件CMakeLists.txt
 36行增加代码:
 set(HAVE__MKGMTIME64 1)
 
 编译：
+```
 mkdir build
 cd build
 # mingw64位编译,如果mingw安装32位版本，则把-DCMAKE_CL_64=1去掉
 cmake -DCMAKE_CL_64=1 -G "MinGW Makefiles" ..
 mingw32-make.exe
-
+```
